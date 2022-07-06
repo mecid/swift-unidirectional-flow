@@ -67,3 +67,17 @@ extension Store {
         return derived
     }
 }
+
+import SwiftUI
+
+extension Store {
+    public func binding<Value>(
+        extract: @escaping (State) -> Value,
+        embed: @escaping (Value) -> Action
+    ) -> Binding<Value> {
+        .init(
+            get: { extract(self.state) },
+            set: { newValue in Task { await self.send(embed(newValue)) } }
+        )
+    }
+}

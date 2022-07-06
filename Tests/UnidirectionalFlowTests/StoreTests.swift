@@ -16,6 +16,7 @@ import XCTest
         case increment
         case decrement
         case sideEffect
+        case set(Int)
     }
     
     struct TestMiddleware: Middleware {
@@ -37,6 +38,8 @@ import XCTest
                 state.counter += 1
             case .decrement:
                 state.counter -= 1
+            case let .set(value):
+                state.counter = value
             default:
                 break
             }
@@ -140,5 +143,25 @@ import XCTest
         
         XCTAssertEqual(system.state.counter, 2)
         XCTAssertEqual(derived.state.counter, 2)
+    }
+    
+    func testBinding() async {
+        let system = Store<State, Action, Void>(
+            initialState: .init(),
+            reducer: TestReducer(),
+            dependencies: (),
+            middlewares: [TestMiddleware()]
+        )
+        
+        let binding = system.binding(
+            extract: \.counter,
+            embed: Action.set
+        )
+        
+        binding.wrappedValue = 10
+        
+        await MainActor.run {
+            XCTAssertEqual(system.state.counter, 10)
+        }
     }
 }
