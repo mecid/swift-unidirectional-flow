@@ -13,8 +13,8 @@ public protocol Reducer<State, Action> {
     func reduce(oldState: State, with action: Action) -> State
 }
 
-struct IdentityReducer<State, Action>: Reducer {
-    func reduce(oldState: State, with action: Action) -> State {
+public struct IdentityReducer<State, Action>: Reducer {
+    public func reduce(oldState: State, with action: Action) -> State {
         oldState
     }
 }
@@ -53,10 +53,10 @@ struct OptionalReducer<UnwrappedState, Action>: Reducer {
     }
 }
 
-struct CombinedReducer<State, Action>: Reducer {
+public struct CombinedReducer<State, Action>: Reducer {
     let reducers: any Collection<any Reducer<State, Action>>
     
-    func reduce(oldState: State, with action: Action) -> State {
+    public func reduce(oldState: State, with action: Action) -> State {
         reducers.reduce(oldState) {
             $1.reduce(oldState: $0, with: action)
         }
@@ -131,15 +131,5 @@ extension Reducer {
     
     public func optional() -> some Reducer<State?, Action> {
         OptionalReducer(reducer: self)
-    }
-    
-    public static func identity() -> some Reducer<State, Action> {
-        IdentityReducer<State, Action>()
-    }
-    
-    public static func combine(
-        reducers: any Collection<any Reducer<State, Action>>
-    ) -> some Reducer<State, Action> {
-        CombinedReducer(reducers: reducers)
     }
 }
