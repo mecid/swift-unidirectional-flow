@@ -1,3 +1,3 @@
 # swift-unidirectional-flow
 
-Unidirectional flow implementing using the latest Swift Generics and Swift Concurrency features.
+Unidirectional flow implemented using the latest Swift Generics and Swift Concurrency features.
