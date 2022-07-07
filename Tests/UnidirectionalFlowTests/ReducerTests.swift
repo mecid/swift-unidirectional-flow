@@ -138,7 +138,7 @@ final class ReducerTests: XCTestCase {
             }
         }
         
-        let liftedReducer = CounterReducer().lift(
+        let liftedReducer = CounterReducer().lifted(
             keyPath: \LiftedState.state,
             prism: LiftedAction.prism
         )

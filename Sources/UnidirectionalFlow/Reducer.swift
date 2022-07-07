@@ -108,7 +108,7 @@ struct OffsetReducer<IndexedState, IndexedAction, State, Action>: Reducer {
 }
 
 extension Reducer {
-    public func lift<LiftedState, LiftedAction>(
+    public func lifted<LiftedState, LiftedAction>(
         keyPath: WritableKeyPath<LiftedState, State>,
         prism: Prism<LiftedAction, Action>
     ) -> some Reducer<LiftedState, LiftedAction> {
