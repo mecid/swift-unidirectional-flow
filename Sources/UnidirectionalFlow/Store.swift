@@ -50,7 +50,6 @@ extension Store {
         let derived = Store<DerivedState, DerivedAction, Void>(
             initialState: deriveState(state),
             reducer: IdentityReducer(),
-            dependencies: (),
             middlewares: [
                 SendableMiddleware { _, action, _ in
                     await self.send(deriveAction(action))
@@ -78,6 +77,21 @@ extension Store {
         .init(
             get: { extract(self.state) },
             set: { newValue in Task { await self.send(embed(newValue)) } }
+        )
+    }
+}
+
+extension Store {
+    public convenience init(
+        initialState state: State,
+        reducer: some Reducer<State, Action>,
+        middlewares: some Collection<any Middleware<State, Action, Void>>
+    ) where Dependencies == Void {
+        self.init(
+            initialState: state,
+            reducer: reducer,
+            dependencies: (),
+            middlewares: middlewares
         )
     }
 }
