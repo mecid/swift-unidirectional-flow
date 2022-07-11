@@ -51,7 +51,6 @@ import XCTest
         let system = Store<State, Action, Void>(
             initialState: .init(),
             reducer: TestReducer(),
-            dependencies: (),
             middlewares: [TestMiddleware()]
         )
         
@@ -66,7 +65,6 @@ import XCTest
         let system = Store<State, Action, Void>(
             initialState: .init(),
             reducer: TestReducer(),
-            dependencies: (),
             middlewares: [TestMiddleware()]
         )
         
@@ -81,7 +79,6 @@ import XCTest
         let system = Store<State, Action, Void>(
             initialState: .init(),
             reducer: TestReducer(),
-            dependencies: (),
             middlewares: [TestMiddleware()]
         )
         
@@ -97,7 +94,6 @@ import XCTest
         let system = Store<State, Action, Void>(
             initialState: .init(),
             reducer: TestReducer(),
-            dependencies: (),
             middlewares: [TestMiddleware()]
         )
         
@@ -149,7 +145,6 @@ import XCTest
         let system = Store<State, Action, Void>(
             initialState: .init(),
             reducer: TestReducer(),
-            dependencies: (),
             middlewares: [TestMiddleware()]
         )
         
