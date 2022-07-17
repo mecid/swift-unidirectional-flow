@@ -19,6 +19,7 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "UnidirectionalFlowTests",
-            dependencies: ["UnidirectionalFlow"])
+            dependencies: ["UnidirectionalFlow"]),
+        .target(name: "Example", dependencies: ["UnidirectionalFlow"])
     ]
 )
