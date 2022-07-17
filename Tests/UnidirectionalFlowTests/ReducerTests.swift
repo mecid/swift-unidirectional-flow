@@ -70,8 +70,10 @@ final class ReducerTests: XCTestCase {
         
         let newState = offsetReducer.reduce(oldState: state, with: .action(1, .increment))
         state.value[1].counter += 1
-        
         XCTAssertEqual(newState, state)
+        
+        let anotherState = offsetReducer.reduce(oldState: state, with: .action(3, .increment))
+        XCTAssertEqual(anotherState, state)
     }
     
     func testKeyed() {

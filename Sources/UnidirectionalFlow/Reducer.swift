@@ -93,7 +93,10 @@ struct OffsetReducer<IndexedState, IndexedAction, State, Action>: Reducer {
     let prism: Prism<IndexedAction, (Int, Action)>
     
     func reduce(oldState: IndexedState, with action: IndexedAction) -> IndexedState {
-        guard let (index, action) = prism.extract(action) else {
+        guard
+            let (index, action) = prism.extract(action),
+            oldState[keyPath: keyPath].indices.contains(index)
+        else {
             return oldState
         }
         
