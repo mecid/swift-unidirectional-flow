@@ -80,3 +80,4 @@ struct SearchContainerView: View {
     }
 }
 ```
+To learn more about Unidirectional Flow in Swift, take a look at my dedicated [post](https://swiftwithmajid.com/2022/03/16/functional-core-imperative-shell-in-swift-unidirectional-flow/).
