@@ -4,11 +4,14 @@
 //
 //  Created by Majid Jabrayilov on 23.06.22.
 //
+
+/// Protocol defining a way to intercept an action to return another one.
 public protocol Middleware<State, Action, Dependencies> {
     associatedtype State
     associatedtype Action
     associatedtype Dependencies
     
+    /// The method processing the current action and returning another one.
     func process(
         state: State,
         with action: Action,
@@ -138,10 +141,12 @@ struct SendableMiddleware<State, Action, Dependencies>: Middleware {
 }
 
 extension Middleware {
+    /// Transforms the `Middleware` to operate over `Optional<State>`.
     public func optional() -> some Middleware<State?, Action, Dependencies> {
         OptionalMiddleware(middleware: self)
     }
     
+    /// Transforms the `Middleware` to operate over `State` wrapped into another type.
     public func lifted<LiftedState, LiftedAction, LiftedDependencies>(
         keyPath: WritableKeyPath<LiftedState, State>,
         prism: Prism<LiftedAction, Action>,
@@ -150,6 +155,7 @@ extension Middleware {
         LiftedMiddleware(middleware: self, keyPath: keyPath, prism: prism, extractDependencies: extractDependencies)
     }
     
+    /// Transforms the `Middleware` to operate over `State` in an `Array`.
     public func offset<IndexedState, IndexedAction, IndexedDependencies>(
         keyPath: WritableKeyPath<IndexedState, [State]>,
         prism: Prism<IndexedAction, (Int, Action)>,
@@ -158,6 +164,7 @@ extension Middleware {
         OffsetMiddleware(middleware: self, keyPath: keyPath, prism: prism, extractDependencies: extractDependencies)
     }
     
+    /// Transforms the `Middleware` to operate over `State` in a `Dictionary`.
     public func keyed<KeyedState, KeyedAction, KeyedDependencies, Key: Hashable>(
         keyPath: WritableKeyPath<KeyedState, [Key: State]>,
         prism: Prism<KeyedAction, (Key, Action)>,

@@ -6,13 +6,16 @@
 //
 import Foundation
 
+/// Type that stores the state of the app or feature.
 @MainActor public final class Store<State, Action, Dependencies>: ObservableObject {
+    /// The current state of the store
     @Published public private(set) var state: State
 
     private let reducer: any Reducer<State, Action>
     private let dependencies: Dependencies
     private let middlewares: any Collection<any Middleware<State, Action, Dependencies>>
 
+    /// Creates an instance of `Store` with the folowing parameters.
     public init(
         initialState state: State,
         reducer: some Reducer<State, Action>,
@@ -24,7 +27,8 @@ import Foundation
         self.dependencies = dependencies
         self.middlewares = middlewares
     }
-
+    
+    /// Use this method to mutate the state of the store by feeding actions.
     public func send(_ action: Action) async {
         state = reducer.reduce(oldState: state, with: action)
 
@@ -43,6 +47,7 @@ import Foundation
 }
 
 extension Store {
+    /// Use this method to create another `Store` deriving from the current one.
     public func derived<DerivedState: Equatable, DerivedAction: Equatable>(
         deriveState: @escaping (State) -> DerivedState,
         deriveAction: @escaping (DerivedAction) -> Action
@@ -70,6 +75,7 @@ extension Store {
 import SwiftUI
 
 extension Store {
+    /// Use this method to create a `SwiftUI.Binding` from any instance of `Store`.
     public func binding<Value>(
         extract: @escaping (State) -> Value,
         embed: @escaping (Value) -> Action
@@ -82,6 +88,7 @@ extension Store {
 }
 
 extension Store {
+    /// Use this initializer to create an instance of `Store` without dependencies.
     public convenience init(
         initialState state: State,
         reducer: some Reducer<State, Action>,

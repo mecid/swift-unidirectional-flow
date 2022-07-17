@@ -6,13 +6,16 @@
 //
 import Foundation
 
+/// Protocol defining the way to mutate the state by applying an action.
 public protocol Reducer<State, Action> {
     associatedtype State
     associatedtype Action
     
+    /// The function returning a new state by taking an old state and an action.
     func reduce(oldState: State, with action: Action) -> State
 }
 
+/// A type conforming to the `Reducer` protocol that doesn't apply any mutation to the old state.
 public struct IdentityReducer<State, Action>: Reducer {
     public func reduce(oldState: State, with action: Action) -> State {
         oldState
@@ -53,6 +56,7 @@ struct OptionalReducer<UnwrappedState, Action>: Reducer {
     }
 }
 
+/// The type of `Reducer` combining a `Collection` of reducers into one instance.
 public struct CombinedReducer<State, Action>: Reducer {
     let reducers: any Collection<any Reducer<State, Action>>
     
@@ -111,6 +115,7 @@ struct OffsetReducer<IndexedState, IndexedAction, State, Action>: Reducer {
 }
 
 extension Reducer {
+    /// Transforms the reducer to operate over `State` wrapped into another type.
     public func lifted<LiftedState, LiftedAction>(
         keyPath: WritableKeyPath<LiftedState, State>,
         prism: Prism<LiftedAction, Action>
@@ -118,6 +123,7 @@ extension Reducer {
         LiftedReducer(reducer: self, keyPath: keyPath, prism: prism)
     }
     
+    /// Transforms the reducer to operate over `State` in a `Dictionary`.
     public func keyed<KeyedState, KeyedAction, Key: Hashable>(
         keyPath: WritableKeyPath<KeyedState, [Key: State]>,
         prism: Prism<KeyedAction, (Key, Action)>
@@ -125,6 +131,7 @@ extension Reducer {
         KeyedReducer(reducer: self, keyPath: keyPath, prism: prism)
     }
     
+    /// Transforms the reducer to operate over `State``State` in an `Array`.
     public func offset<OffsetState, OffsetAction>(
         keyPath: WritableKeyPath<OffsetState, [State]>,
         prism: Prism<OffsetAction, (Int, Action)>
@@ -132,6 +139,7 @@ extension Reducer {
         OffsetReducer(reducer: self, keyPath: keyPath, prism: prism)
     }
     
+    /// Transforms the reducer to operate over `Optional<State>`.
     public func optional() -> some Reducer<State?, Action> {
         OptionalReducer(reducer: self)
     }
