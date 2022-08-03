@@ -34,7 +34,7 @@ import Foundation
 
         await withTaskGroup(of: Optional<Action>.self) { [state, dependencies] group in
             middlewares.forEach { middleware in
-                group.addTask {
+                _ = group.addTaskUnlessCancelled {
                     await middleware.process(state: state, with: action, using: dependencies)
                 }
             }
