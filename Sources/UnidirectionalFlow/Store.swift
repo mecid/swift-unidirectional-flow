@@ -32,10 +32,10 @@ import Foundation
     public func send(_ action: Action) async {
         state = reducer.reduce(oldState: state, with: action)
 
-        await withTaskGroup(of: Optional<Action>.self) { [state, dependencies] group in
+        await withTaskGroup(of: Optional<Action>.self) { group in
             middlewares.forEach { middleware in
                 _ = group.addTaskUnlessCancelled {
-                    await middleware.process(state: state, with: action, using: dependencies)
+                    await middleware.process(state: self.state, with: action, using: self.dependencies)
                 }
             }
             
