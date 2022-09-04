@@ -20,7 +20,7 @@ final class MiddlewareTests: XCTestCase {
     typealias Dependencies = Void
     
     struct CounterMiddleware: Middleware {
-        func process(state: State, with action: Action, using dependencies: Dependencies) async -> Action? {
+        func process(state: State, with action: Action) async -> Action? {
             switch action {
             case .increment: return .decrement
             case .decrement: return .increment
@@ -32,11 +32,11 @@ final class MiddlewareTests: XCTestCase {
         let state: State? = .init(counter: 1)
         
         let optional = CounterMiddleware().optional()
-        let nextAction = await optional.process(state: nil, with: .increment, using: ())
+        let nextAction = await optional.process(state: nil, with: .increment)
         
         XCTAssertNil(nextAction)
         
-        let anotherAction = await optional.process(state: state, with: .increment, using: ())
+        let anotherAction = await optional.process(state: state, with: .increment)
         
         XCTAssertEqual(anotherAction, .decrement)
     }
@@ -63,11 +63,10 @@ final class MiddlewareTests: XCTestCase {
         
         let lifted = CounterMiddleware().lifted(
             keyPath: \LiftedState.state,
-            prism: LiftedAction.prism,
-            extractDependencies: { (lifted: Dependencies) -> Void in () }
+            prism: LiftedAction.prism
         )
         
-        let nextAction = await lifted.process(state: .init(), with: .action(.increment), using: ())
+        let nextAction = await lifted.process(state: .init(), with: .action(.increment))
         XCTAssertEqual(nextAction, .action(.decrement))
     }
     
@@ -89,18 +88,15 @@ final class MiddlewareTests: XCTestCase {
             }
         }
         
-        typealias KeyedDependencies = Void
-        
         let keyed = CounterMiddleware().keyed(
             keyPath: \KeyedState.keyed,
-            prism: KeyedAction.prism,
-            extractDependencies: { (keyed: KeyedDependencies) -> Void in () }
+            prism: KeyedAction.prism
         )
         
-        let nextAction = await keyed.process(state: .init(), with: .action("key", .increment), using: ())
+        let nextAction = await keyed.process(state: .init(), with: .action("key", .increment))
         XCTAssertEqual(nextAction, .action("key", .decrement))
         
-        let nilAction = await keyed.process(state: .init(), with: .action("key1", .increment), using: ())
+        let nilAction = await keyed.process(state: .init(), with: .action("key1", .increment))
         XCTAssertNil(nilAction)
     }
     
@@ -126,11 +122,10 @@ final class MiddlewareTests: XCTestCase {
         
         let offset = CounterMiddleware().offset(
             keyPath: \OffsetState.state,
-            prism: OffsetAction.prism,
-            extractDependencies: { (offset: OffsetDependencies) -> Void in () }
+            prism: OffsetAction.prism
         )
         
-        let nextAction = await offset.process(state: .init(), with: .action(0, .increment), using: ())
+        let nextAction = await offset.process(state: .init(), with: .action(0, .increment))
         XCTAssertEqual(nextAction, .action(0, .decrement))
     }
 }
