@@ -20,7 +20,7 @@ import XCTest
     }
     
     struct TestMiddleware: Middleware {
-        func process(state: State, with action: Action, using dependencies: Void) async -> Action? {
+        func process(state: State, with action: Action) async -> Action? {
             guard action == .sideEffect else {
                 return nil
             }
@@ -48,7 +48,7 @@ import XCTest
     }
     
     func testSend() async {
-        let store = Store<State, Action, Void>(
+        let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
             middlewares: [TestMiddleware()]
@@ -62,7 +62,7 @@ import XCTest
     }
     
     func testMiddleware() async {
-        let store = Store<State, Action, Void>(
+        let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
             middlewares: [TestMiddleware()]
@@ -76,7 +76,7 @@ import XCTest
     }
     
     func testMiddlewareCancellation() async {
-        let store = Store<State, Action, Void>(
+        let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
             middlewares: [TestMiddleware()]
@@ -91,7 +91,7 @@ import XCTest
     }
     
     func testDerivedStore() async throws {
-        let store = Store<State, Action, Void>(
+        let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
             middlewares: [TestMiddleware()]
@@ -142,7 +142,7 @@ import XCTest
     }
     
     func testBinding() async {
-        let store = Store<State, Action, Void>(
+        let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
             middlewares: [TestMiddleware()]

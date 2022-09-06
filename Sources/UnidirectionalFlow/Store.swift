@@ -7,24 +7,21 @@
 import Foundation
 
 /// Type that stores the state of the app or feature.
-@MainActor public final class Store<State, Action, Dependencies>: ObservableObject {
+@MainActor public final class Store<State, Action>: ObservableObject {
     /// The current state of the store
     @Published public private(set) var state: State
 
     private let reducer: any Reducer<State, Action>
-    private let dependencies: Dependencies
-    private let middlewares: any Collection<any Middleware<State, Action, Dependencies>>
+    private let middlewares: any Collection<any Middleware<State, Action>>
 
     /// Creates an instance of `Store` with the folowing parameters.
     public init(
         initialState state: State,
         reducer: some Reducer<State, Action>,
-        dependencies: Dependencies,
-        middlewares: some Collection<any Middleware<State, Action, Dependencies>>
+        middlewares: some Collection<any Middleware<State, Action>>
     ) {
         self.state = state
         self.reducer = reducer
-        self.dependencies = dependencies
         self.middlewares = middlewares
     }
     
@@ -35,7 +32,7 @@ import Foundation
         await withTaskGroup(of: Optional<Action>.self) { group in
             middlewares.forEach { middleware in
                 _ = group.addTaskUnlessCancelled {
-                    await middleware.process(state: self.state, with: action, using: self.dependencies)
+                    await middleware.process(state: self.state, with: action)
                 }
             }
             
@@ -51,12 +48,12 @@ extension Store {
     public func derived<DerivedState: Equatable, DerivedAction: Equatable>(
         deriveState: @escaping (State) -> DerivedState,
         deriveAction: @escaping (DerivedAction) -> Action
-    ) -> Store<DerivedState, DerivedAction, Void> {
-        let derived = Store<DerivedState, DerivedAction, Void>(
+    ) -> Store<DerivedState, DerivedAction> {
+        let derived = Store<DerivedState, DerivedAction>(
             initialState: deriveState(state),
             reducer: IdentityReducer(),
             middlewares: [
-                SendableMiddleware { _, action, _ in
+                SendableMiddleware { _, action in
                     await self.send(deriveAction(action))
                     return nil
                 }
@@ -83,22 +80,6 @@ extension Store {
         .init(
             get: { extract(self.state) },
             set: { newValue in Task { await self.send(embed(newValue)) } }
-        )
-    }
-}
-
-extension Store {
-    /// Use this initializer to create an instance of `Store` without dependencies.
-    public convenience init(
-        initialState state: State,
-        reducer: some Reducer<State, Action>,
-        middlewares: some Collection<any Middleware<State, Action, Void>>
-    ) where Dependencies == Void {
-        self.init(
-            initialState: state,
-            reducer: reducer,
-            dependencies: (),
-            middlewares: middlewares
         )
     }
 }
