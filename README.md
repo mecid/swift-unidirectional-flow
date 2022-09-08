@@ -29,16 +29,30 @@ struct SearchReducer: Reducer {
     }
 }
 
-struct SearchDependencies {
-    var search: (String) async throws -> SearchResponse
-}
-
 struct SearchMiddleware: Middleware {
-    func process(
-        state: SearchState,
-        with action: SearchAction,
-        using dependencies: SearchDependencies
-    ) async -> SearchAction? {
+    struct Dependencies {
+        var search: (String) async throws -> SearchResponse
+        
+        static var production: Dependencies {
+            .init { query in
+                guard var urlComponents = URLComponents(string: "https://api.github.com/search/repositories") else {
+                    return .init(items: [])
+                }
+                urlComponents.queryItems = [.init(name: "q", value: query)]
+                
+                guard let url = urlComponents.url else {
+                    return .init(items: [])
+                }
+                
+                let (data, _) = try await URLSession.shared.data(from: url)
+                return try JSONDecoder().decode(SearchResponse.self, from: data)
+            }
+        }
+    }
+
+    let dependencies: Dependencies
+    
+    func process(state: SearchState, with action: SearchAction) async -> SearchAction? {
         switch action {
         case let .search(query):
             let results = try? await dependencies.search(query)
@@ -49,14 +63,13 @@ struct SearchMiddleware: Middleware {
     }
 }
 
-typealias SearchStore = Store<SearchState, SearchAction, SearchDependencies>
+typealias SearchStore = Store<SearchState, SearchAction>
 
 struct SearchContainerView: View {
     @StateObject private var store = SearchStore(
         initialState: .init(),
         reducer: SearchReducer(),
-        dependencies: .production,
-        middlewares: [SearchMiddleware()]
+        middlewares: [SearchMiddleware(dependencies: .production)]
     )
     @State private var query = ""
     
@@ -79,5 +92,6 @@ struct SearchContainerView: View {
         .navigationTitle("Github Search")
     }
 }
+
 ```
 To learn more about Unidirectional Flow in Swift, take a look at my dedicated [post](https://swiftwithmajid.com/2022/03/16/functional-core-imperative-shell-in-swift-unidirectional-flow/).
