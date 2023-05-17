@@ -22,7 +22,26 @@ public struct IdentityReducer<State, Action>: Reducer {
     }
 }
 
-struct LiftedReducer<LiftedState, LiftedAction, LoweredState, LoweredAction>: Reducer {
+/// The type of `Reducer` combining a `Collection` of reducers into one instance.
+public struct CombinedReducer<State, Action>: Reducer {
+    let reducers: any Collection<any Reducer<State, Action>>
+    
+    public init(reducers: any Reducer<State, Action>...) {
+        self.reducers = reducers
+    }
+    
+    public init(reducers: some Collection<any Reducer<State, Action>>) {
+        self.reducers = reducers
+    }
+    
+    public func reduce(oldState: State, with action: Action) -> State {
+        reducers.reduce(oldState) {
+            $1.reduce(oldState: $0, with: action)
+        }
+    }
+}
+
+private struct LiftedReducer<LiftedState, LiftedAction, LoweredState, LoweredAction>: Reducer {
     typealias State = LiftedState
     typealias Action = LiftedAction
     
@@ -46,7 +65,7 @@ struct LiftedReducer<LiftedState, LiftedAction, LoweredState, LoweredAction>: Re
     }
 }
 
-struct OptionalReducer<UnwrappedState, Action>: Reducer {
+private struct OptionalReducer<UnwrappedState, Action>: Reducer {
     typealias State = Optional<UnwrappedState>
     
     let reducer: any Reducer<UnwrappedState, Action>
@@ -56,18 +75,7 @@ struct OptionalReducer<UnwrappedState, Action>: Reducer {
     }
 }
 
-/// The type of `Reducer` combining a `Collection` of reducers into one instance.
-public struct CombinedReducer<State, Action>: Reducer {
-    let reducers: any Collection<any Reducer<State, Action>>
-    
-    public func reduce(oldState: State, with action: Action) -> State {
-        reducers.reduce(oldState) {
-            $1.reduce(oldState: $0, with: action)
-        }
-    }
-}
-
-struct KeyedReducer<KeyedState, KeyedAction, State, Action, Key: Hashable>: Reducer {
+private struct KeyedReducer<KeyedState, KeyedAction, State, Action, Key: Hashable>: Reducer {
     let reducer: any Reducer<State, Action>
     
     let keyPath: WritableKeyPath<KeyedState, [Key: State]>
@@ -90,7 +98,7 @@ struct KeyedReducer<KeyedState, KeyedAction, State, Action, Key: Hashable>: Redu
     }
 }
 
-struct OffsetReducer<IndexedState, IndexedAction, State, Action>: Reducer {
+private struct OffsetReducer<IndexedState, IndexedAction, State, Action>: Reducer {
     let reducer: any Reducer<State, Action>
     
     let keyPath: WritableKeyPath<IndexedState, [State]>
