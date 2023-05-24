@@ -7,9 +7,9 @@
 import Foundation
 
 /// Type that stores the state of the app or feature.
-@MainActor public final class Store<State, Action>: ObservableObject {
+@MainActor @dynamicMemberLookup public final class Store<State, Action>: ObservableObject {
     /// The current state of the store
-    @Published public private(set) var state: State
+    @Published private var state: State
 
     private let reducer: any Reducer<State, Action>
     private let middlewares: any Collection<any Middleware<State, Action>>
@@ -23,6 +23,11 @@ import Foundation
         self.state = state
         self.reducer = reducer
         self.middlewares = middlewares
+    }
+    
+    /// A subscript providing access the state of the store.
+    public subscript<T>(dynamicMember keyPath: KeyPath<State, T>) -> T {
+        state[keyPath: keyPath]
     }
     
     /// Use this method to mutate the state of the store by feeding actions.

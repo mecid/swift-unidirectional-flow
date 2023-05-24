@@ -88,7 +88,7 @@ struct SearchContainerView: View {
     @State private var query = ""
     
     var body: some View {
-        List(store.state.repos) { repo in
+        List(store.repos) { repo in
             VStack(alignment: .leading) {
                 Text(repo.name)
                     .font(.headline)
@@ -98,7 +98,7 @@ struct SearchContainerView: View {
                 }
             }
         }
-        .redacted(reason: store.state.isLoading ? .placeholder : [])
+        .redacted(reason: store.isLoading ? .placeholder : [])
         .searchable(text: $query)
         .task(id: query) {
             await store.send(.search(query: query))
