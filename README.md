@@ -76,11 +76,11 @@ struct SearchContainerView: View {
     var body: some View {
         List(store.repos) { repo in
             VStack(alignment: .leading) {
-                Text(repo.name)
+                Text(verbatim: repo.name)
                     .font(.headline)
                 
                 if let description = repo.description {
-                    Text(description)
+                    Text(verbatim: description)
                 }
             }
         }
