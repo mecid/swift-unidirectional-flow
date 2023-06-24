@@ -50,16 +50,18 @@ import Foundation
 
 extension Store {
     /// Use this method to create another `Store` deriving from the current one.
-    public func derived<DerivedState: Equatable, DerivedAction: Equatable>(
+    public func derived<DerivedState: Equatable, DerivedAction>(
         deriveState: @escaping (State) -> DerivedState,
-        deriveAction: @escaping (DerivedAction) -> Action
+        deriveAction: @escaping (DerivedAction) -> Action?
     ) -> Store<DerivedState, DerivedAction> {
         let derived = Store<DerivedState, DerivedAction>(
             initialState: deriveState(state),
             reducer: IdentityReducer(),
             middlewares: [
                 SendableMiddleware { _, action in
-                    await self.send(deriveAction(action))
+                    if let derivedAction = deriveAction(action) {
+                        await self.send(derivedAction)
+                    }
                     return nil
                 }
             ]
