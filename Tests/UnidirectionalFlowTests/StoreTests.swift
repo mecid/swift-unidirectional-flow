@@ -51,7 +51,8 @@ import XCTest
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
-            middlewares: [TestMiddleware()]
+            middlewares: [TestMiddleware()],
+            publishers: []
         )
         
         XCTAssertEqual(store.counter, 0)
@@ -65,7 +66,8 @@ import XCTest
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
-            middlewares: [TestMiddleware()]
+            middlewares: [TestMiddleware()],
+            publishers: []
         )
         
         XCTAssertEqual(store.counter, 0)
@@ -79,7 +81,8 @@ import XCTest
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
-            middlewares: [TestMiddleware()]
+            middlewares: [TestMiddleware()],
+            publishers: []
         )
         
         XCTAssertEqual(store.counter, 0)
@@ -94,7 +97,8 @@ import XCTest
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
-            middlewares: [TestMiddleware()]
+            middlewares: [TestMiddleware()],
+            publishers: []
         )
         
         let derived = store.derived(deriveState: { $0 }, deriveAction: { $0 } )
@@ -161,7 +165,8 @@ import XCTest
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
-            middlewares: [TestMiddleware()]
+            middlewares: [TestMiddleware()],
+            publishers: []
         )
         
         let binding = store.binding(

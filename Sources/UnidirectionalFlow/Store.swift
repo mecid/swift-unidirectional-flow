@@ -5,6 +5,7 @@
 //  Created by Majid Jabrayilov on 11.06.22.
 //
 import Foundation
+import Combine
 
 /// Type that stores the state of the app or feature.
 @MainActor @dynamicMemberLookup public final class Store<State, Action>: ObservableObject {
@@ -13,16 +14,26 @@ import Foundation
 
     private let reducer: any Reducer<State, Action>
     private let middlewares: any Collection<any Middleware<State, Action>>
+    private var subscribers = Set<AnyCancellable>()
 
     /// Creates an instance of `Store` with the folowing parameters.
     public init(
         initialState state: State,
         reducer: some Reducer<State, Action>,
-        middlewares: some Collection<any Middleware<State, Action>>
+        middlewares: some Collection<any Middleware<State, Action>>,
+        publishers: some Collection<AnyPublisher<Action, Never>>
     ) {
         self.state = state
         self.reducer = reducer
         self.middlewares = middlewares
+
+        // Subscribe to publishers and forward actions.
+        for publisher in publishers {
+            publisher.sink { action in
+                Task { await self.send(action) }
+            }
+            .store(in: &subscribers)
+        }
     }
     
     /// A subscript providing access the state of the store.
@@ -64,7 +75,8 @@ extension Store {
                     }
                     return nil
                 }
-            ]
+            ],
+            publishers: []
         )
         
         $state
