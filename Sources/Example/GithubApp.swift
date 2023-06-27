@@ -83,7 +83,8 @@ struct SearchContainerView: View {
     @StateObject private var store = SearchStore(
         initialState: .init(),
         reducer: SearchReducer(),
-        middlewares: [SearchMiddleware(dependencies: .production)]
+        middlewares: [SearchMiddleware(dependencies: .production)],
+        publishers: []
     )
     @State private var query = ""
     
