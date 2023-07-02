@@ -57,6 +57,7 @@ extension Store {
         let derived = Store<DerivedState, DerivedAction>(
             initialState: deriveState(state),
             reducer: IdentityReducer(),
+            dependencies: (),
             middlewares: [
                 SendableMiddleware { _, action in
                     await self.send(deriveAction(action))
