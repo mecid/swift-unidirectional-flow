@@ -143,22 +143,6 @@ import XCTest
         
         XCTAssertEqual(store.counter, 2)
         XCTAssertEqual(derived.counter, 2)
-
-        let emptyAction: (Action) -> Action? = { _ in nil }
-        let derivedWithoutAction = store.derived(deriveState: { $0 }, deriveAction: emptyAction)
-
-        XCTAssertEqual(store.counter, 2)
-        XCTAssertEqual(derivedWithoutAction.counter, 2)
-
-        await derivedWithoutAction.send(.increment)
-
-        XCTAssertEqual(store.counter, 2)
-        XCTAssertEqual(derivedWithoutAction.counter, 2)
-
-        await store.send(.increment)
-
-        XCTAssertEqual(store.counter, 3)
-        XCTAssertEqual(derivedWithoutAction.counter, 3)
     }
     
     func testBinding() async {

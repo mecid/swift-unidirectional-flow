@@ -61,18 +61,16 @@ import Combine
 
 extension Store {
     /// Use this method to create another `Store` deriving from the current one.
-    public func derived<DerivedState: Equatable, DerivedAction>(
+    public func derived<DerivedState: Equatable, DerivedAction: Equatable>(
         deriveState: @escaping (State) -> DerivedState,
-        deriveAction: @escaping (DerivedAction) -> Action?
+        deriveAction: @escaping (DerivedAction) -> Action
     ) -> Store<DerivedState, DerivedAction> {
         let derived = Store<DerivedState, DerivedAction>(
             initialState: deriveState(state),
             reducer: IdentityReducer(),
             middlewares: [
                 SendableMiddleware { _, action in
-                    if let derivedAction = deriveAction(action) {
-                        await self.send(derivedAction)
-                    }
+                    await self.send(deriveAction(action))
                     return nil
                 }
             ],
