@@ -5,6 +5,7 @@
 //  Created by Majid Jabrayilov on 23.06.22.
 //
 @testable import UnidirectionalFlow
+import Combine
 import XCTest
 
 @MainActor final class StoreTests: XCTestCase {
@@ -94,11 +95,17 @@ import XCTest
     }
     
     func testDerivedStore() async throws {
+        let publisher1 = PassthroughSubject<Action, Never>()
+        let publisher2 = PassthroughSubject<Action, Never>()
+
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
             middlewares: [TestMiddleware()],
-            publishers: []
+            publishers: [
+                publisher1.eraseToAnyPublisher(),
+                publisher2.eraseToAnyPublisher()
+            ]
         )
         
         let derived = store.derived(deriveState: { $0 }, deriveAction: { $0 } )
@@ -143,6 +150,20 @@ import XCTest
         
         XCTAssertEqual(store.counter, 2)
         XCTAssertEqual(derived.counter, 2)
+
+        publisher1.send(.increment)
+
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        XCTAssertEqual(store.counter, 3)
+        XCTAssertEqual(derived.counter, 3)
+
+        publisher2.send(.increment)
+
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        XCTAssertEqual(store.counter, 4)
+        XCTAssertEqual(derived.counter, 4)
     }
     
     func testBinding() async {

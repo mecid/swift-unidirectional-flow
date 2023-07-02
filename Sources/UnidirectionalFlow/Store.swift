@@ -27,7 +27,6 @@ import Combine
         self.reducer = reducer
         self.middlewares = middlewares
 
-        // Subscribe to publishers and forward actions.
         for publisher in publishers {
             publisher.sink { action in
                 Task { await self.send(action) }
