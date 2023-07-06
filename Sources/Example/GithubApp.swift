@@ -70,6 +70,9 @@ struct SearchMiddleware: Middleware {
         switch action {
         case let .search(query):
             let results = try? await dependencies.search(query)
+            guard !Task.isCancelled else {
+                return .setResults(repos: state.repos)
+            }
             return .setResults(repos: results?.items ?? [])
         default:
             return nil
