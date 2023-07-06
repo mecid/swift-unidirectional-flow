@@ -36,12 +36,12 @@ import Foundation
 
         await withTaskGroup(of: Optional<Action>.self) { group in
             middlewares.forEach { middleware in
-                _ = group.addTaskUnlessCancelled {
+                group.addTask {
                     await middleware.process(state: self.state, with: action)
                 }
             }
             
-            for await case let nextAction? in group where !Task.isCancelled {
+            for await case let nextAction? in group {
                 await send(nextAction)
             }
         }

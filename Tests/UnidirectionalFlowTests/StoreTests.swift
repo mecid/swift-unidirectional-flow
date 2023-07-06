@@ -26,7 +26,7 @@ import XCTest
             }
             
             try? await Task.sleep(nanoseconds: 1_000_000_000)
-            return .increment
+            return Task.isCancelled ? nil : .increment
         }
     }
     
@@ -84,6 +84,7 @@ import XCTest
         
         XCTAssertEqual(store.counter, 0)
         let task = Task { await store.send(.sideEffect) }
+        try? await Task.sleep(nanoseconds: 10_000_000)
         XCTAssertEqual(store.counter, 0)
         task.cancel()
         await task.value
