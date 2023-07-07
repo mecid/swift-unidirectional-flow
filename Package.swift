@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "swift-unidirectional-flow",
-    platforms: [.iOS(.v16), .macOS(.v13), .tvOS(.v16), .watchOS(.v9)],
+    platforms: [.iOS("17"), .macOS("14"), .tvOS("17"), .watchOS("10")],
     products: [
         .library(
             name: "UnidirectionalFlow",

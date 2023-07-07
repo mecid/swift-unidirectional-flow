@@ -7,7 +7,7 @@
 @testable import UnidirectionalFlow
 import XCTest
 
-@MainActor final class StoreTests: XCTestCase {
+final class StoreTests: XCTestCase {
     struct State: Equatable {
         var counter = 0
     }
@@ -156,9 +156,8 @@ import XCTest
         
         binding.wrappedValue = 10
         
-        await MainActor.run {
-            XCTAssertEqual(store.counter, 10)
-        }
+        try? await Task.sleep(nanoseconds: 1_000_000)
+        XCTAssertEqual(store.counter, 10)
     }
     
     func testThreadSafety() async {
