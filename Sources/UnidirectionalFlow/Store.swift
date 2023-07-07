@@ -4,15 +4,15 @@
 //
 //  Created by Majid Jabrayilov on 11.06.22.
 //
-import Foundation
+import Observation
 
 /// Type that stores the state of the app or feature.
-@MainActor @dynamicMemberLookup public final class Store<State, Action>: ObservableObject {
-    /// The current state of the store
-    @Published private var state: State
+@Observable @dynamicMemberLookup public final class Store<State, Action> {
+    private var state: State
 
     private let reducer: any Reducer<State, Action>
     private let middlewares: any Collection<any Middleware<State, Action>>
+    private let lock = NSRecursiveLock()
 
     /// Creates an instance of `Store` with the folowing parameters.
     public init(
@@ -25,26 +25,30 @@ import Foundation
         self.middlewares = middlewares
     }
     
-    /// A subscript providing access the state of the store.
+    /// A subscript providing access to the state of the store.
     public subscript<T>(dynamicMember keyPath: KeyPath<State, T>) -> T {
-        state[keyPath: keyPath]
+        lock.withLock { state[keyPath: keyPath] }
     }
     
     /// Use this method to mutate the state of the store by feeding actions.
-    public func send(_ action: Action) async {
+    @MainActor public func send(_ action: Action) async {
         apply(action)
         await intercept(action)
     }
     
     private func apply(_ action: Action) {
-        state = reducer.reduce(oldState: state, with: action)
+        lock.withLock {
+            state = reducer.reduce(oldState: state, with: action)
+        }
     }
     
     private func intercept(_ action: Action) async {
+        let capturedState = lock.withLock { state }
+        
         await withTaskGroup(of: Optional<Action>.self) { group in
             middlewares.forEach { middleware in
                 group.addTask {
-                    await middleware.process(state: self.state, with: action)
+                    await middleware.process(state: capturedState, with: action)
                 }
             }
             
@@ -63,7 +67,7 @@ extension Store {
         deriveAction: @escaping (DerivedAction) -> Action
     ) -> Store<DerivedState, DerivedAction> {
         let derived = Store<DerivedState, DerivedAction>(
-            initialState: deriveState(state),
+            initialState: lock.withLock { deriveState(state) },
             reducer: IdentityReducer(),
             middlewares: [
                 ClosureMiddleware { _, action in
@@ -73,11 +77,23 @@ extension Store {
             ]
         )
         
-        $state
-            .map(deriveState)
-            .removeDuplicates()
-            .assign(to: &derived.$state)
+        @Sendable func enableStateObservationTracking() {
+            withObservationTracking {
+                let newState = lock.withLock { deriveState(state) }
+                derived.lock.withLock {
+                    if derived.state != newState {
+                        derived.state = newState
+                    }
+                }
+            } onChange: {
+                Task {
+                    enableStateObservationTracking()
+                }
+            }
+        }
         
+        enableStateObservationTracking()
+
         return derived
     }
 }
@@ -91,7 +107,7 @@ extension Store {
         embed: @escaping (Value) -> Action
     ) -> Binding<Value> {
         .init(
-            get: { extract(self.state) },
+            get: { self.lock.withLock { extract(self.state) } },
             set: { newValue in
                 let action = embed(newValue)
                 self.apply(action)
