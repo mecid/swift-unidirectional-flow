@@ -98,3 +98,12 @@ struct SearchContainerView: View {
 
 ```
 To learn more about Unidirectional Flow in Swift, take a look at my dedicated [post](https://swiftwithmajid.com/2022/03/16/functional-core-imperative-shell-in-swift-unidirectional-flow/).
+
+## Installation
+Add this Swift package in Xcode using its Github repository url. (File > Swift Packages > Add Package Dependency...)
+
+## Author
+Majid Jabrayilov: cmecid@gmail.com
+
+## License
+swift-unidirectional-flow package is available under the MIT license. See the LICENSE file for more info.
