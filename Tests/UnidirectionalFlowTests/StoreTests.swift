@@ -160,4 +160,22 @@ import XCTest
             XCTAssertEqual(store.counter, 10)
         }
     }
+    
+    func testThreadSafety() async {
+        let store = Store<State, Action>(
+            initialState: .init(),
+            reducer: TestReducer(),
+            middlewares: [TestMiddleware()]
+        )
+        
+        await withTaskGroup(of: Void.self) { group in
+            for _ in 1...1_000_000 {
+                group.addTask {
+                    await store.send(.increment)
+                }
+            }
+        }
+        
+        XCTAssertEqual(store.counter, 1_000_000)
+    }
 }
