@@ -1,6 +1,7 @@
 # swift-unidirectional-flow
 
-Unidirectional flow implemented using the latest Swift Generics and Swift Concurrency features.
+Unidirectional flow implemented using the latest Swift Generics and Swift Concurrency features. To learn more about Unidirectional Flow in Swift, take a look at my dedicated [post](https://swiftwithmajid.com/2023/07/11/unidirectional-flow-in-swift/).
+
 
 ```swift
 struct SearchState: Equatable {
@@ -97,7 +98,6 @@ struct SearchContainerView: View {
 }
 
 ```
-To learn more about Unidirectional Flow in Swift, take a look at my dedicated [post](https://swiftwithmajid.com/2023/07/11/unidirectional-flow-in-swift/).
 
 ## Installation
 Add this Swift package in Xcode using its Github repository url. (File > Swift Packages > Add Package Dependency...)
