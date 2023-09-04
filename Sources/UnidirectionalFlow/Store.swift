@@ -7,7 +7,7 @@
 import Foundation
 
 /// Type that stores the state of the app or feature.
-@MainActor @dynamicMemberLookup public final class Store<State, Action>: ObservableObject {
+@MainActor @dynamicMemberLookup public final class Store<State, Action>: ObservableObject, Sendable {
     /// The current state of the store
     @Published private var state: State
 
