@@ -7,7 +7,7 @@
 import Foundation
 
 /// Type that stores the state of the app or feature.
-@MainActor @dynamicMemberLookup public final class Store<State, Action>: ObservableObject, Sendable {
+@MainActor @dynamicMemberLookup public final class Store<State, Action>: ObservableObject {
     /// The current state of the store
     @Published private var state: State
 
@@ -59,7 +59,7 @@ extension Store {
             initialState: deriveState(state),
             reducer: IdentityReducer(),
             middlewares: [
-                SendableMiddleware { _, action in
+                ClosureMiddleware { _, action in
                     await self.send(deriveAction(action))
                     return nil
                 }
