@@ -1,11 +1,11 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "swift-unidirectional-flow",
-    platforms: [.iOS("17"), .macOS("14"), .tvOS("17"), .watchOS("10")],
+    platforms: [.iOS(.v17), .macOS(.v14), .tvOS(.v17), .watchOS(.v10)],
     products: [
         .library(
             name: "UnidirectionalFlow",
