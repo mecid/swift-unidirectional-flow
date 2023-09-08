@@ -101,6 +101,8 @@ struct SearchContainerView: View {
 ## Installation
 Add this Swift package in Xcode using its Github repository url. (File > Swift Packages > Add Package Dependency...)
 
+[v0.3](https://github.com/mecid/swift-unidirectional-flow/tree/0.3) - Introduced the new Observation framework available only on iOS 17 and macOS 14. Use previous versions to target older versions of iOS and macOS.
+
 ## Author
 Majid Jabrayilov: cmecid@gmail.com
 
