@@ -43,7 +43,7 @@ struct SearchReducer: Reducer {
     }
 }
 
-struct SearchMiddleware: Middleware {
+actor SearchMiddleware: Middleware {
     struct Dependencies {
         var search: (String) async throws -> SearchResponse
         
@@ -65,6 +65,9 @@ struct SearchMiddleware: Middleware {
     }
 
     let dependencies: Dependencies
+    init(dependencies: Dependencies) {
+        self.dependencies = dependencies
+    }
     
     func process(state: SearchState, with action: SearchAction) async -> SearchAction? {
         switch action {
