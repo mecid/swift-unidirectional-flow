@@ -32,8 +32,15 @@ import Foundation
     
     /// Use this method to mutate the state of the store by feeding actions.
     public func send(_ action: Action) async {
+        apply(action)
+        await intercept(action)
+    }
+    
+    private func apply(_ action: Action) {
         state = reducer.reduce(oldState: state, with: action)
-
+    }
+    
+    private func intercept(_ action: Action) async {
         await withTaskGroup(of: Optional<Action>.self) { group in
             middlewares.forEach { middleware in
                 group.addTask {
@@ -85,7 +92,14 @@ extension Store {
     ) -> Binding<Value> {
         .init(
             get: { extract(self.state) },
-            set: { newValue in Task { await self.send(embed(newValue)) } }
+            set: { newValue in
+                let action = embed(newValue)
+                self.apply(action)
+                
+                Task {
+                    await self.intercept(action)
+                }
+            }
         )
     }
 }
