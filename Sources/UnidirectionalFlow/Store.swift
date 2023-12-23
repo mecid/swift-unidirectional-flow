@@ -31,12 +31,12 @@ import Observation
     }
     
     /// Use this method to mutate the state of the store by feeding actions.
-    @MainActor public func send(_ action: Action) async {
-        apply(action)
+    public func send(_ action: Action) async {
+        await apply(action)
         await intercept(action)
     }
     
-    private func apply(_ action: Action) {
+    @MainActor private func apply(_ action: Action) {
         lock.withLock {
             state = reducer.reduce(oldState: state, with: action)
         }
@@ -110,7 +110,10 @@ extension Store {
             get: { self.lock.withLock { extract(self.state) } },
             set: { newValue in
                 let action = embed(newValue)
-                self.apply(action)
+                
+                MainActor.assumeIsolated {
+                    self.apply(action)
+                }
                 
                 Task {
                     await self.intercept(action)

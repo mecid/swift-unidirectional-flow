@@ -142,7 +142,7 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(derived.counter, 2)
     }
     
-    func testBinding() async {
+    @MainActor func testBinding() async {
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
