@@ -160,21 +160,32 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(store.counter, 10)
     }
     
-    func testThreadSafety() async {
-        let store = Store<State, Action>(
-            initialState: .init(),
-            reducer: TestReducer(),
-            middlewares: [TestMiddleware()]
-        )
-        
-        await withTaskGroup(of: Void.self) { group in
-            for _ in 1...1_000_000 {
-                group.addTask {
-                    await store.send(.increment)
+    func testThreadSafety() {
+        measure {
+            let store = Store<State, Action>(
+                initialState: .init(),
+                reducer: TestReducer(),
+                middlewares: [TestMiddleware()]
+            )
+            
+            let expectation = expectation(description: "measurement")
+            
+            Task {
+                await withTaskGroup(of: Void.self) { group in
+                    for _ in 1...1_000_000 {
+                        group.addTask {
+                            await store.send(.increment)
+                        }
+                    }
+                    
+                    await group.waitForAll()
+                    expectation.fulfill()
                 }
             }
+         
+            wait(for: [expectation], timeout: 200)
+            
+            XCTAssertEqual(store.counter, 1_000_000)
         }
-        
-        XCTAssertEqual(store.counter, 1_000_000)
     }
 }
