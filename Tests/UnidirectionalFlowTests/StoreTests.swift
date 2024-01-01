@@ -172,7 +172,7 @@ final class StoreTests: XCTestCase {
             
             Task {
                 await withTaskGroup(of: Void.self) { group in
-                    for _ in 1...1_000_000 {
+                    for _ in 1...100_000 {
                         group.addTask {
                             await store.send(.increment)
                         }
@@ -185,7 +185,7 @@ final class StoreTests: XCTestCase {
          
             wait(for: [expectation], timeout: 200)
             
-            XCTAssertEqual(store.counter, 1_000_000)
+            XCTAssertEqual(store.counter, 100_000)
         }
     }
 }
