@@ -85,7 +85,7 @@ actor SearchMiddleware: Middleware {
 
 typealias SearchStore = Store<SearchState, SearchAction>
 
-struct SearchContainerView: View {
+@MainActor struct SearchView: View {
     @State private var store = SearchStore(
         initialState: .init(),
         reducer: SearchReducer(),
@@ -117,7 +117,7 @@ struct SearchContainerView: View {
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                SearchContainerView()
+                SearchView()
             }
         }
     }

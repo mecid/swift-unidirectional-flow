@@ -47,7 +47,7 @@ final class StoreTests: XCTestCase {
         }
     }
     
-    func testSend() async {
+    @MainActor func testSend() async {
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
@@ -61,7 +61,7 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(store.counter, 0)
     }
     
-    func testMiddleware() async {
+    @MainActor func testMiddleware() async {
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
@@ -75,7 +75,7 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(store.counter, 1)
     }
     
-    func testMiddlewareCancellation() async {
+    @MainActor func testMiddlewareCancellation() async {
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
@@ -91,7 +91,7 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(store.counter, 0)
     }
     
-    func testDerivedStore() async throws {
+    @MainActor func testDerivedStore() async throws {
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
@@ -160,7 +160,7 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(store.counter, 10)
     }
     
-    func testThreadSafety() {
+    @MainActor func testThreadSafety() {
         measure {
             let store = Store<State, Action>(
                 initialState: .init(),
