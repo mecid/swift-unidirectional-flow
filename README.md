@@ -72,7 +72,7 @@ actor SearchMiddleware: Middleware {
 
 typealias SearchStore = Store<SearchState, SearchAction>
 
-struct SearchContainerView: View {
+@MainActor struct SearchContainerView: View {
     @State private var store = SearchStore(
         initialState: .init(),
         reducer: SearchReducer(),
