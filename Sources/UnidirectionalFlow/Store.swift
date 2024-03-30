@@ -71,19 +71,14 @@ extension Store {
             ]
         )
         
-        enableStateObservation(
-            for: store,
-            deriveState: deriveState,
-            deriveAction: deriveAction
-        )
+        enableStateObservation(for: store, deriveState: deriveState)
 
         return store
     }
     
     private func enableStateObservation<DerivedState: Equatable, DerivedAction: Equatable>(
         for store: Store<DerivedState, DerivedAction>,
-        deriveState: @escaping (State) -> DerivedState,
-        deriveAction: @escaping (DerivedAction) -> Action
+        deriveState: @escaping (State) -> DerivedState
     ) {
         withObservationTracking {
             let newState = deriveState(state)
@@ -92,11 +87,7 @@ extension Store {
             }
         } onChange: {
             Task {
-                await self.enableStateObservation(
-                    for: store,
-                    deriveState: deriveState,
-                    deriveAction: deriveAction
-                )
+                await self.enableStateObservation(for: store, deriveState: deriveState)
             }
         }
     }

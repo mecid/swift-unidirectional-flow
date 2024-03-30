@@ -9,16 +9,22 @@ let package = Package(
     products: [
         .library(
             name: "UnidirectionalFlow",
-            targets: ["UnidirectionalFlow"]),
+            targets: ["UnidirectionalFlow"]
+        ),
     ],
     dependencies: [],
     targets: [
         .target(
             name: "UnidirectionalFlow",
-            dependencies: []),
+            dependencies: []
+        ),
         .testTarget(
             name: "UnidirectionalFlowTests",
-            dependencies: ["UnidirectionalFlow"]),
-        .target(name: "Example", dependencies: ["UnidirectionalFlow"])
+            dependencies: ["UnidirectionalFlow"]
+        ),
+        .target(
+            name: "Example",
+            dependencies: ["UnidirectionalFlow"]
+        )
     ]
 )
