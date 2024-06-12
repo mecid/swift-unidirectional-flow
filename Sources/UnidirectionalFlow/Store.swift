@@ -7,16 +7,16 @@
 import Observation
 
 /// Type that stores the state of the app or module allowing feeding actions.
-@Observable @dynamicMemberLookup @MainActor public final class Store<State, Action> {
+@Observable @dynamicMemberLookup @MainActor public final class Store<State: Sendable, Action: Sendable> {
     private var state: State
     private let reducer: any Reducer<State, Action>
-    private let middlewares: any Collection<any Middleware<State, Action>>
+    private let middlewares: Array<any Middleware<State, Action>>
 
     /// Creates an instance of `Store` with the folowing parameters.
     public init(
         initialState state: State,
         reducer: some Reducer<State, Action>,
-        middlewares: some Collection<any Middleware<State, Action>>
+        middlewares: Array<any Middleware<State, Action>>
     ) {
         self.state = state
         self.reducer = reducer
@@ -57,8 +57,8 @@ extension Store {
     /// Use this method to create another `Store` deriving from the current one.
     @available(*, deprecated, message: "Use multiple stores instead of derived store")
     public func derived<DerivedState: Equatable, DerivedAction: Equatable>(
-        deriveState: @escaping (State) -> DerivedState,
-        deriveAction: @escaping (DerivedAction) -> Action
+        deriveState: @Sendable @escaping (State) -> DerivedState,
+        deriveAction: @Sendable @escaping (DerivedAction) -> Action
     ) -> Store<DerivedState, DerivedAction> {
         let store = Store<DerivedState, DerivedAction>(
             initialState: deriveState(state),
@@ -78,7 +78,7 @@ extension Store {
     
     private func enableStateObservation<DerivedState: Equatable, DerivedAction: Equatable>(
         for store: Store<DerivedState, DerivedAction>,
-        deriveState: @escaping (State) -> DerivedState
+        deriveState: @Sendable @escaping (State) -> DerivedState
     ) {
         withObservationTracking {
             let newState = deriveState(state)

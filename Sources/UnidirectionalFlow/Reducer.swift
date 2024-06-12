@@ -7,30 +7,30 @@
 import Foundation
 
 /// Protocol defining the way to mutate the state by applying an action.
-public protocol Reducer<State, Action> {
-    associatedtype State
-    associatedtype Action
+public protocol Reducer<State, Action>: Sendable {
+    associatedtype State: Sendable
+    associatedtype Action: Sendable
     
     /// The function returning a new state by taking an old state and an action.
     func reduce(oldState: State, with action: Action) -> State
 }
 
 /// A type conforming to the `Reducer` protocol that doesn't apply any mutation to the old state.
-public struct IdentityReducer<State, Action>: Reducer {
+public struct IdentityReducer<State: Sendable, Action: Sendable>: Reducer {
     public func reduce(oldState: State, with action: Action) -> State {
         oldState
     }
 }
 
 /// The type of `Reducer` combining a `Collection` of reducers into one instance.
-public struct CombinedReducer<State, Action>: Reducer {
-    let reducers: any Collection<any Reducer<State, Action>>
+public struct CombinedReducer<State: Sendable, Action: Sendable>: Reducer {
+    let reducers: Array<any Reducer<State, Action>>
     
     public init(reducers: any Reducer<State, Action>...) {
         self.reducers = reducers
     }
     
-    public init(reducers: some Collection<any Reducer<State, Action>>) {
+    public init(reducers: Array<any Reducer<State, Action>>) {
         self.reducers = reducers
     }
     
@@ -41,12 +41,12 @@ public struct CombinedReducer<State, Action>: Reducer {
     }
 }
 
-private struct LiftedReducer<LiftedState, LiftedAction, LoweredState, LoweredAction>: Reducer {
+private struct LiftedReducer<LiftedState: Sendable, LiftedAction: Sendable, LoweredState: Sendable, LoweredAction: Sendable>: Reducer {
     typealias State = LiftedState
     typealias Action = LiftedAction
     
     let reducer: any Reducer<LoweredState, LoweredAction>
-    let keyPath: WritableKeyPath<LiftedState, LoweredState>
+    let keyPath: WritableKeyPath<LiftedState, LoweredState> & Sendable
     let prism: Prism<LiftedAction, LoweredAction>
     
     func reduce(oldState: State, with action: Action) -> State {
@@ -65,7 +65,7 @@ private struct LiftedReducer<LiftedState, LiftedAction, LoweredState, LoweredAct
     }
 }
 
-private struct OptionalReducer<UnwrappedState, Action>: Reducer {
+private struct OptionalReducer<UnwrappedState: Sendable, Action: Sendable>: Reducer {
     typealias State = Optional<UnwrappedState>
     
     let reducer: any Reducer<UnwrappedState, Action>
@@ -75,10 +75,10 @@ private struct OptionalReducer<UnwrappedState, Action>: Reducer {
     }
 }
 
-private struct KeyedReducer<KeyedState, KeyedAction, State, Action, Key: Hashable>: Reducer {
+private struct KeyedReducer<KeyedState: Sendable, KeyedAction: Sendable, State: Sendable, Action: Sendable, Key: Hashable & Sendable>: Reducer {
     let reducer: any Reducer<State, Action>
     
-    let keyPath: WritableKeyPath<KeyedState, [Key: State]>
+    let keyPath: WritableKeyPath<KeyedState, [Key: State]> & Sendable
     let prism: Prism<KeyedAction, (Key, Action)>
     
     func reduce(oldState: KeyedState, with action: KeyedAction) -> KeyedState {
@@ -98,10 +98,10 @@ private struct KeyedReducer<KeyedState, KeyedAction, State, Action, Key: Hashabl
     }
 }
 
-private struct OffsetReducer<IndexedState, IndexedAction, State, Action>: Reducer {
+private struct OffsetReducer<IndexedState: Sendable, IndexedAction: Sendable, State: Sendable, Action: Sendable>: Reducer {
     let reducer: any Reducer<State, Action>
     
-    let keyPath: WritableKeyPath<IndexedState, [State]>
+    let keyPath: WritableKeyPath<IndexedState, [State]> & Sendable
     let prism: Prism<IndexedAction, (Int, Action)>
     
     func reduce(oldState: IndexedState, with action: IndexedAction) -> IndexedState {
@@ -124,24 +124,24 @@ private struct OffsetReducer<IndexedState, IndexedAction, State, Action>: Reduce
 
 extension Reducer {
     /// Transforms the reducer to operate over `State` wrapped into another type.
-    public func lifted<LiftedState, LiftedAction>(
-        keyPath: WritableKeyPath<LiftedState, State>,
+    public func lifted<LiftedState: Sendable, LiftedAction: Sendable>(
+        keyPath: WritableKeyPath<LiftedState, State> & Sendable,
         prism: Prism<LiftedAction, Action>
     ) -> some Reducer<LiftedState, LiftedAction> {
         LiftedReducer(reducer: self, keyPath: keyPath, prism: prism)
     }
     
     /// Transforms the reducer to operate over `State` in a `Dictionary`.
-    public func keyed<KeyedState, KeyedAction, Key: Hashable>(
-        keyPath: WritableKeyPath<KeyedState, [Key: State]>,
+    public func keyed<KeyedState: Sendable, KeyedAction: Sendable, Key: Hashable & Sendable>(
+        keyPath: WritableKeyPath<KeyedState, [Key: State]> & Sendable,
         prism: Prism<KeyedAction, (Key, Action)>
     ) -> some Reducer<KeyedState, KeyedAction> {
         KeyedReducer(reducer: self, keyPath: keyPath, prism: prism)
     }
     
     /// Transforms the reducer to operate over `State``State` in an `Array`.
-    public func offset<OffsetState, OffsetAction>(
-        keyPath: WritableKeyPath<OffsetState, [State]>,
+    public func offset<OffsetState: Sendable, OffsetAction: Sendable>(
+        keyPath: WritableKeyPath<OffsetState, [State]> & Sendable,
         prism: Prism<OffsetAction, (Int, Action)>
     ) -> some Reducer<OffsetState, OffsetAction> {
         OffsetReducer(reducer: self, keyPath: keyPath, prism: prism)
