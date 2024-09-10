@@ -6,13 +6,13 @@
 //
 
 /// Type that defines a way to embed and extract a value from another type.
-public struct Prism<Source, Target> {
-    let embed: (Target) -> Source
-    let extract: (Source) -> Target?
+public struct Prism<Source, Target>: Sendable {
+    let embed: @Sendable (Target) -> Source
+    let extract: @Sendable (Source) -> Target?
     
     public init(
-        embed: @escaping (Target) -> Source,
-        extract: @escaping (Source) -> Target?
+        embed: @Sendable @escaping (Target) -> Source,
+        extract: @Sendable @escaping (Source) -> Target?
     ) {
         self.embed = embed
         self.extract = extract
