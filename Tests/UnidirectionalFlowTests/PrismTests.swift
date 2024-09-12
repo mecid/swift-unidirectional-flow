@@ -5,9 +5,9 @@
 //  Created by Majid Jabrayilov on 07.07.22.
 //
 @testable import UnidirectionalFlow
-import XCTest
+import Testing
 
-final class PrismTests: XCTestCase {
+struct PrismTests {
     enum LeftAction: Equatable {
         case action
     }
@@ -30,12 +30,12 @@ final class PrismTests: XCTestCase {
         }
     }
     
-    func testExtract() {
-        XCTAssertNil(Action.leftPrism.extract(Action.right(.action)))
-        XCTAssertEqual(Action.leftPrism.extract(Action.left(.action)), LeftAction.action)
+    @Test func extract() {
+        #expect(Action.leftPrism.extract(Action.right(.action)) == nil)
+        #expect(Action.leftPrism.extract(Action.left(.action)) == LeftAction.action)
     }
     
-    func testEmbed() {
-        XCTAssertEqual(Action.leftPrism.embed(.action), Action.left(.action))
+    @Test func embed() {
+        #expect(Action.leftPrism.embed(.action) == Action.left(.action))
     }
 }

@@ -4,10 +4,10 @@
 //
 //  Created by Majid Jabrayilov on 23.06.22.
 //
-import XCTest
 @testable import UnidirectionalFlow
+import Testing
 
-final class ReducerTests: XCTestCase {
+struct ReducerTests {
     struct State: Equatable {
         var counter: Int
     }
@@ -30,19 +30,19 @@ final class ReducerTests: XCTestCase {
         }
     }
     
-    func testOptional() {
+    @Test func optional() {
         var state: State? = State(counter: 10)
         let reducer = CounterReducer()
         let optionalReducer = reducer.optional()
         let newState = optionalReducer.reduce(oldState: state, with: .increment)
-        XCTAssertEqual(newState, State(counter: 11))
+        #expect(newState == State(counter: 11))
         
         state = nil
         let anotherNewState = optionalReducer.reduce(oldState: state, with: .decrement)
-        XCTAssertNil(anotherNewState)
+        #expect(anotherNewState == nil)
     }
     
-    func testOffset() {
+    @Test func offset() {
         struct OffsetState: Equatable {
             var value: [State] = [.init(counter: 1), .init(counter: 2)]
         }
@@ -70,13 +70,13 @@ final class ReducerTests: XCTestCase {
         
         let newState = offsetReducer.reduce(oldState: state, with: .action(1, .increment))
         state.value[1].counter += 1
-        XCTAssertEqual(newState, state)
+        #expect(newState == state)
         
         let anotherState = offsetReducer.reduce(oldState: state, with: .action(3, .increment))
-        XCTAssertEqual(anotherState, state)
+        #expect(anotherState == state)
     }
     
-    func testKeyed() {
+    @Test func keyed() {
         struct KeyedState: Equatable {
             var value: [String: State] = ["one": .init(counter: 10)]
         }
@@ -102,14 +102,13 @@ final class ReducerTests: XCTestCase {
         var state = KeyedState()
         let newState = keyedReducer.reduce(oldState: state, with: .action("one", .increment))
         state.value["one"]?.counter += 1
-        
-        XCTAssertEqual(newState, state)
+        #expect(newState == state)
         
         let anotherNewState = keyedReducer.reduce(oldState: state, with: .action("two", .increment))
-        XCTAssertEqual(anotherNewState, state)
+        #expect(anotherNewState == state)
     }
     
-    func testCombined() {
+    @Test func combined() {
         let combinedReducer: some Reducer<State, Action> = CombinedReducer(
             reducers: [
                 CounterReducer(), CounterReducer()
@@ -119,10 +118,10 @@ final class ReducerTests: XCTestCase {
         let state = State(counter: 0)
         let newState = combinedReducer.reduce(oldState: state, with: .increment)
         
-        XCTAssertEqual(newState, .init(counter: 2))
+        #expect(newState == .init(counter: 2))
     }
     
-    func testLift() {
+    @Test func lift() {
         struct LiftedState: Equatable {
             var state: State
         }
@@ -148,13 +147,13 @@ final class ReducerTests: XCTestCase {
         var state = LiftedState(state: .init(counter: 1))
         let newState = liftedReducer.reduce(oldState: state, with: .action(.increment))
         state.state.counter += 1
-        XCTAssertEqual(newState, state)
+        #expect(newState == state)
     }
     
-    func testIdentity() {
+    @Test func identity() {
         let identityReducer: some Reducer<State, Action> = IdentityReducer()
         let state = State(counter: 1)
         let newState = identityReducer.reduce(oldState: state, with: .increment)
-        XCTAssertEqual(state, newState)
+        #expect(state == newState)
     }
 }

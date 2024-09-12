@@ -1,13 +1,13 @@
 //
 //  MiddlewareTests.swift
-//  
+//  UnidirectionalFlowTests
 //
 //  Created by Majid Jabrayilov on 14.07.22.
 //
 @testable import UnidirectionalFlow
-import XCTest
+import Testing
 
-final class MiddlewareTests: XCTestCase {
+struct MiddlewareTests {
     struct State: Equatable {
         var counter: Int
     }
@@ -28,20 +28,18 @@ final class MiddlewareTests: XCTestCase {
         }
     }
     
-    func testOptional() async {
+    @Test func optional() async {
         let state: State? = .init(counter: 1)
         
         let optional = CounterMiddleware().optional()
         let nextAction = await optional.process(state: nil, with: .increment)
-        
-        XCTAssertNil(nextAction)
+        #expect(nextAction == nil)
         
         let anotherAction = await optional.process(state: state, with: .increment)
-        
-        XCTAssertEqual(anotherAction, .decrement)
+        #expect(anotherAction == .decrement)
     }
     
-    func testLifted() async {
+    @Test func lifted() async {
         struct LiftedState: Equatable {
             var state = State(counter: 1)
         }
@@ -67,10 +65,10 @@ final class MiddlewareTests: XCTestCase {
         )
         
         let nextAction = await lifted.process(state: .init(), with: .action(.increment))
-        XCTAssertEqual(nextAction, .action(.decrement))
+        #expect(nextAction == .action(.decrement))
     }
     
-    func testKeyed() async {
+    @Test func keyed() async {
         struct KeyedState: Equatable {
             var keyed = ["key": State(counter: 1)]
         }
@@ -94,13 +92,13 @@ final class MiddlewareTests: XCTestCase {
         )
         
         let nextAction = await keyed.process(state: .init(), with: .action("key", .increment))
-        XCTAssertEqual(nextAction, .action("key", .decrement))
+        #expect(nextAction == .action("key", .decrement))
         
         let nilAction = await keyed.process(state: .init(), with: .action("key1", .increment))
-        XCTAssertNil(nilAction)
+        #expect(nilAction == nil)
     }
     
-    func testOffset() async {
+    @Test func offset() async {
         struct OffsetState: Equatable {
             var state: [State] = [.init(counter: 1)]
         }
@@ -126,6 +124,6 @@ final class MiddlewareTests: XCTestCase {
         )
         
         let nextAction = await offset.process(state: .init(), with: .action(0, .increment))
-        XCTAssertEqual(nextAction, .action(0, .decrement))
+        #expect(nextAction == .action(0, .decrement))
     }
 }

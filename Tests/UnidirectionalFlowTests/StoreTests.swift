@@ -5,9 +5,9 @@
 //  Created by Majid Jabrayilov on 23.06.22.
 //
 @testable import UnidirectionalFlow
-import XCTest
+import Testing
 
-final class StoreTests: XCTestCase {
+@MainActor struct StoreTests {
     struct State: Equatable {
         var counter = 0
     }
@@ -47,51 +47,51 @@ final class StoreTests: XCTestCase {
         }
     }
     
-    @MainActor func testSend() async {
+    @Test func send() async {
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
             middlewares: [TestMiddleware()]
         )
         
-        XCTAssertEqual(store.counter, 0)
+        #expect(store.counter == 0)
         await store.send(.increment)
-        XCTAssertEqual(store.counter, 1)
+        #expect(store.counter == 1)
         await store.send(.decrement)
-        XCTAssertEqual(store.counter, 0)
+        #expect(store.counter == 0)
     }
     
-    @MainActor func testMiddleware() async {
+    @Test func middleware() async {
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
             middlewares: [TestMiddleware()]
         )
         
-        XCTAssertEqual(store.counter, 0)
+        #expect(store.counter == 0)
         let task = Task { await store.send(.sideEffect) }
-        XCTAssertEqual(store.counter, 0)
+        #expect(store.counter == 0)
         await task.value
-        XCTAssertEqual(store.counter, 1)
+        #expect(store.counter == 1)
     }
     
-    @MainActor func testMiddlewareCancellation() async {
+    @Test func middlewareCancellation() async {
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
             middlewares: [TestMiddleware()]
         )
         
-        XCTAssertEqual(store.counter, 0)
+        #expect(store.counter == 0)
         let task = Task { await store.send(.sideEffect) }
         try? await Task.sleep(nanoseconds: 10_000_000)
-        XCTAssertEqual(store.counter, 0)
+        #expect(store.counter == 0)
         task.cancel()
         await task.value
-        XCTAssertEqual(store.counter, 0)
+        #expect(store.counter == 0)
     }
     
-    @MainActor func testDerivedStore() async throws {
+    @Test func derivedStore() async throws {
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
@@ -100,18 +100,18 @@ final class StoreTests: XCTestCase {
         
         let derived = store.derived(deriveState: { $0 }, deriveAction: { $0 } )
         
-        XCTAssertEqual(store.counter, 0)
-        XCTAssertEqual(derived.counter, 0)
+        #expect(store.counter == 0)
+        #expect(derived.counter == 0)
         
         await store.send(.sideEffect)
         
-        XCTAssertEqual(store.counter, 1)
-        XCTAssertEqual(derived.counter, 1)
+        #expect(store.counter == 1)
+        #expect(derived.counter == 1)
         
         await derived.send(.sideEffect)
         
-        XCTAssertEqual(store.counter, 2)
-        XCTAssertEqual(derived.counter, 2)
+        #expect(store.counter == 2)
+        #expect(derived.counter == 2)
         
         let derivedTask = Task { await derived.send(.sideEffect) }
         derivedTask.cancel()
@@ -119,8 +119,8 @@ final class StoreTests: XCTestCase {
         
         try await Task.sleep(nanoseconds: 1_000_000_000)
         
-        XCTAssertEqual(store.counter, 2)
-        XCTAssertEqual(derived.counter, 2)
+        #expect(store.counter == 2)
+        #expect(derived.counter == 2)
         
         let task = Task { await store.send(.sideEffect) }
         task.cancel()
@@ -128,21 +128,21 @@ final class StoreTests: XCTestCase {
         
         try await Task.sleep(nanoseconds: 1_000_000_000)
         
-        XCTAssertEqual(store.counter, 2)
-        XCTAssertEqual(derived.counter, 2)
+        #expect(store.counter == 2)
+        #expect(derived.counter == 2)
         
         await store.send(.increment)
         
-        XCTAssertEqual(store.counter, 3)
-        XCTAssertEqual(derived.counter, 3)
+        #expect(store.counter == 3)
+        #expect(derived.counter == 3)
         
         await derived.send(.decrement)
         
-        XCTAssertEqual(store.counter, 2)
-        XCTAssertEqual(derived.counter, 2)
+        #expect(store.counter == 2)
+        #expect(derived.counter == 2)
     }
     
-    @MainActor func testBinding() async {
+    @Test func binding() async {
         let store = Store<State, Action>(
             initialState: .init(),
             reducer: TestReducer(),
@@ -157,35 +157,26 @@ final class StoreTests: XCTestCase {
         binding.wrappedValue = 10
         
         try? await Task.sleep(nanoseconds: 1_000_000)
-        XCTAssertEqual(store.counter, 10)
+        #expect(store.counter == 10)
     }
     
-    @MainActor func testThreadSafety() {
-        measure {
-            let store = Store<State, Action>(
-                initialState: .init(),
-                reducer: TestReducer(),
-                middlewares: [TestMiddleware()]
-            )
-            
-            let expectation = expectation(description: "measurement")
-            
-            Task {
-                await withTaskGroup(of: Void.self) { group in
-                    for _ in 1...100_000 {
-                        group.addTask {
-                            await store.send(.increment)
-                        }
-                    }
-                    
-                    await group.waitForAll()
-                    expectation.fulfill()
+    @Test func threadSafety() async {
+        let store = Store<State, Action>(
+            initialState: .init(),
+            reducer: TestReducer(),
+            middlewares: [TestMiddleware()]
+        )
+        
+        await withTaskGroup(of: Void.self) { group in
+            for _ in 1...100_000 {
+                group.addTask {
+                    await store.send(.increment)
                 }
             }
-         
-            wait(for: [expectation], timeout: 200)
             
-            XCTAssertEqual(store.counter, 100_000)
+            await group.waitForAll()
         }
+        
+        #expect(store.counter == 100_000)
     }
 }
