@@ -167,14 +167,12 @@ import Testing
             middlewares: [TestMiddleware()]
         )
         
-        await withTaskGroup(of: Void.self) { group in
+        await withDiscardingTaskGroup { group in
             for _ in 1...100_000 {
                 group.addTask {
                     await store.send(.increment)
                 }
             }
-            
-            await group.waitForAll()
         }
         
         #expect(store.counter == 100_000)
