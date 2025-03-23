@@ -101,10 +101,12 @@ extension Store {
     ) -> Binding<Value> {
         .init(
             get: { extract(self.state) },
-            set: { newValue in
+            set: { newValue, transaction in
                 let action = embed(newValue)
                 
-                self.apply(action)
+                withTransaction(transaction) {
+                    self.apply(action)
+                }
                 
                 Task {
                     await self.intercept(action)
