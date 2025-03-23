@@ -155,8 +155,6 @@ import Testing
         )
         
         binding.wrappedValue = 10
-        
-        try? await Task.sleep(nanoseconds: 1_000_000)
         #expect(store.counter == 10)
     }
     
