@@ -30,12 +30,8 @@ import Observation
     
     /// Use this method to mutate the state of the store by feeding actions.
     public func send(_ action: Action) async {
-        apply(action)
-        await intercept(action)
-    }
-    
-    private func apply(_ action: Action) {
         state = reducer.reduce(oldState: state, with: action)
+        await intercept(action)
     }
     
     private func intercept(_ action: Action) async {
@@ -105,7 +101,7 @@ extension Store {
                 let action = embed(newValue)
                 
                 withTransaction(transaction) {
-                    self.apply(action)
+                    self.state = self.reducer.reduce(oldState: self.state, with: action)
                 }
                 
                 Task {
