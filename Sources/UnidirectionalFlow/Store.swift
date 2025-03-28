@@ -6,7 +6,10 @@
 //
 import Observation
 
-/// Type that stores the state of the app or module allowing feeding actions.
+/// Type that stores the state of the feature or module allowing feeding actions.
+///
+/// The ``Store`` type serves as the single source of truth for your state and handles state mutations through actions.
+/// It coordinates between the state, reducer, and middlewares to maintain a predictable state container.
 @Observable @dynamicMemberLookup @MainActor public final class Store<State: Sendable, Action: Sendable> {
     private var state: State
     private let reducer: any Reducer<State, Action>
