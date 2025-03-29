@@ -5,7 +5,10 @@
 //  Created by Majid Jabrayilov on 23.06.22.
 //
 
-/// Protocol defining a way to intercept an action to return another one.
+/// A protocol that defines middleware for intercepting and processing actions in a unidirectional data flow architecture.
+///
+/// Middleware provides a way to observe actions flowing through the store and optionally transform them
+/// or trigger side effects. It can be used for logging, analytics, API calls, async tasks, or any other side effects.
 public protocol Middleware<State, Action>: Sendable {
     associatedtype State: Sendable
     associatedtype Action: Sendable
