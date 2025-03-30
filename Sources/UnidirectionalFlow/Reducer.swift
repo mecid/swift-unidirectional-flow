@@ -6,7 +6,10 @@
 //
 import Foundation
 
-/// Protocol defining the way to mutate the state by applying an action.
+/// A protocol that defines how state mutations occur in response to actions.
+///
+/// Reducers are pure functions that produce a new state by applying an action to the current state.
+/// They form the core of state mutation logic in a unidirectional data flow architecture.
 public protocol Reducer<State, Action> {
     associatedtype State
     associatedtype Action
