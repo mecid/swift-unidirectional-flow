@@ -18,14 +18,14 @@ public protocol Reducer<State, Action> {
     func reduce(oldState: State, with action: Action) -> State
 }
 
-/// A type conforming to the `Reducer` protocol that doesn't apply any mutation to the old state.
+/// A type conforming to the ``Reducer`` protocol that doesn't apply any mutation to the old state.
 public struct IdentityReducer<State, Action>: Reducer {
     public func reduce(oldState: State, with action: Action) -> State {
         oldState
     }
 }
 
-/// The type of `Reducer` combining a `Collection` of reducers into one instance.
+/// The type of ``Reducer`` combining a `Collection` of reducers into one instance.
 public struct CombinedReducer<State, Action>: Reducer {
     let reducers: any Collection<any Reducer<State, Action>>
     

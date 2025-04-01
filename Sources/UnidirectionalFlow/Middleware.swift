@@ -98,12 +98,12 @@ struct ClosureMiddleware<State: Sendable, Action: Sendable>: Middleware {
 }
 
 extension Middleware {
-    /// Transforms the `Middleware` to operate over `Optional<State>`.
+    /// Transforms the ``Middleware`` to operate over `Optional<State>`.
     public func optional() -> some Middleware<State?, Action> {
         OptionalMiddleware(middleware: self)
     }
     
-    /// Transforms the `Middleware` to operate over `State` wrapped into another type.
+    /// Transforms the ``Middleware`` to operate over `State` wrapped into another type.
     public func lifted<LiftedState: Sendable, LiftedAction: Sendable>(
         keyPath: WritableKeyPath<LiftedState, State> & Sendable,
         prism: Prism<LiftedAction, Action>
@@ -111,7 +111,7 @@ extension Middleware {
         LiftedMiddleware(middleware: self, keyPath: keyPath, prism: prism)
     }
     
-    /// Transforms the `Middleware` to operate over `State` in an `Array`.
+    /// Transforms the ``Middleware`` to operate over `State` in an `Array`.
     public func offset<IndexedState: Sendable, IndexedAction: Sendable>(
         keyPath: WritableKeyPath<IndexedState, [State]> & Sendable,
         prism: Prism<IndexedAction, (Int, Action)>
@@ -119,7 +119,7 @@ extension Middleware {
         OffsetMiddleware(middleware: self, keyPath: keyPath, prism: prism)
     }
     
-    /// Transforms the `Middleware` to operate over `State` in a `Dictionary`.
+    /// Transforms the ``Middleware`` to operate over `State` in a `Dictionary`.
     public func keyed<KeyedState: Sendable, KeyedAction: Sendable, Key: Hashable>(
         keyPath: WritableKeyPath<KeyedState, [Key: State]> & Sendable,
         prism: Prism<KeyedAction, (Key, Action)>

@@ -51,7 +51,7 @@ import Observation
 }
 
 extension Store {
-    /// Use this method to create another `Store` deriving from the current one.
+    /// Use this method to create another ``Store`` deriving from the current one.
     @available(*, deprecated, message: "Use multiple stores instead of derived store")
     public func derived<DerivedState: Equatable, DerivedAction: Equatable>(
         deriveState: @Sendable @escaping (State) -> DerivedState,
