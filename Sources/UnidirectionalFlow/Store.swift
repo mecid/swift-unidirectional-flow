@@ -27,7 +27,7 @@ import Observation
     }
     
     /// A subscript providing access to the state of the store.
-    public subscript<T>(dynamicMember keyPath: KeyPath<State, T>) -> T {
+    public subscript<T>(dynamicMember keyPath: KeyPath<State, T> & Sendable) -> T {
         state[keyPath: keyPath]
     }
     
