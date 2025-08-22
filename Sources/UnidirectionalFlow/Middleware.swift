@@ -75,7 +75,10 @@ struct OffsetMiddleware<IndexedState: Sendable, IndexedAction: Sendable, State, 
     let prism: Prism<IndexedAction, (Int, Action)>
     
     func process(state: IndexedState, with action: IndexedAction) async -> IndexedAction? {
-        guard let (index, action) = prism.extract(action) else {
+        guard
+            let (index, action) = prism.extract(action),
+            state[keyPath: keyPath].indices.contains(index)
+        else {
             return nil
         }
         
