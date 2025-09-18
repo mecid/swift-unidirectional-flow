@@ -32,7 +32,7 @@ struct OptionalMiddleware<UnwrappedState: Sendable, Action: Sendable>: Middlewar
 
 struct LiftedMiddleware<LiftedState: Sendable, LiftedAction: Sendable, LoweredState, LoweredAction>: Middleware {
     let middleware: any Middleware<LoweredState, LoweredAction>
-    let keyPath: WritableKeyPath<LiftedState, LoweredState> & Sendable
+    let keyPath: KeyPath<LiftedState, LoweredState> & Sendable
     let prism: Prism<LiftedAction, LoweredAction>
     
     func process(state: LiftedState, with action: LiftedAction) async -> LiftedAction? {
@@ -50,7 +50,7 @@ struct LiftedMiddleware<LiftedState: Sendable, LiftedAction: Sendable, LoweredSt
 
 struct KeyedMiddleware<KeyedState: Sendable, KeyedAction: Sendable, State, Action, Key: Hashable>: Middleware {
     let middleware: any Middleware<State, Action>
-    let keyPath: WritableKeyPath<KeyedState, [Key: State]> & Sendable
+    let keyPath: KeyPath<KeyedState, [Key: State]> & Sendable
     let prism: Prism<KeyedAction, (Key, Action)>
     
     func process(state: KeyedState, with action: KeyedAction) async -> KeyedAction? {
@@ -71,7 +71,7 @@ struct KeyedMiddleware<KeyedState: Sendable, KeyedAction: Sendable, State, Actio
 
 struct OffsetMiddleware<IndexedState: Sendable, IndexedAction: Sendable, State, Action>: Middleware {
     let middleware: any Middleware<State, Action>
-    let keyPath: WritableKeyPath<IndexedState, [State]> & Sendable
+    let keyPath: KeyPath<IndexedState, [State]> & Sendable
     let prism: Prism<IndexedAction, (Int, Action)>
     
     func process(state: IndexedState, with action: IndexedAction) async -> IndexedAction? {
@@ -108,7 +108,7 @@ extension Middleware {
     
     /// Transforms the ``Middleware`` to operate over `State` wrapped into another type.
     public func lifted<LiftedState: Sendable, LiftedAction: Sendable>(
-        keyPath: WritableKeyPath<LiftedState, State> & Sendable,
+        keyPath: KeyPath<LiftedState, State> & Sendable,
         prism: Prism<LiftedAction, Action>
     ) -> some Middleware<LiftedState, LiftedAction> {
         LiftedMiddleware(middleware: self, keyPath: keyPath, prism: prism)
@@ -116,7 +116,7 @@ extension Middleware {
     
     /// Transforms the ``Middleware`` to operate over `State` in an `Array`.
     public func offset<IndexedState: Sendable, IndexedAction: Sendable>(
-        keyPath: WritableKeyPath<IndexedState, [State]> & Sendable,
+        keyPath: KeyPath<IndexedState, [State]> & Sendable,
         prism: Prism<IndexedAction, (Int, Action)>
     ) -> some Middleware<IndexedState, IndexedAction> {
         OffsetMiddleware(middleware: self, keyPath: keyPath, prism: prism)
@@ -124,7 +124,7 @@ extension Middleware {
     
     /// Transforms the ``Middleware`` to operate over `State` in a `Dictionary`.
     public func keyed<KeyedState: Sendable, KeyedAction: Sendable, Key: Hashable>(
-        keyPath: WritableKeyPath<KeyedState, [Key: State]> & Sendable,
+        keyPath: KeyPath<KeyedState, [Key: State]> & Sendable,
         prism: Prism<KeyedAction, (Key, Action)>
     ) -> some Middleware<KeyedState, KeyedAction> {
         KeyedMiddleware(middleware: self, keyPath: keyPath, prism: prism)
