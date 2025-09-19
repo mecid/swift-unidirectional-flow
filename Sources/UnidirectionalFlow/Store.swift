@@ -32,6 +32,9 @@ import Observation
     }
     
     /// Use this method to mutate the state of the store by feeding actions.
+    ///
+    /// The reducer handles the action synchronously and updates `state` before any middleware runs,
+    /// so middleware observes the post-reduction state when it processes the action.
     public func send(_ action: Action) async {
         state = reducer.reduce(oldState: state, with: action)
         await intercept(action)
