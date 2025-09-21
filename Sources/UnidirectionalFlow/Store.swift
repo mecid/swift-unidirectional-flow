@@ -41,10 +41,10 @@ import Observation
     }
     
     private func intercept(_ action: Action) async {
-        await withDiscardingTaskGroup { group in
+        await withDiscardingTaskGroup { [state] group in
             for middleware in middlewares {
                 group.addTask {
-                    if let nextAction = await middleware.process(state: self.state, with: action) {
+                    if let nextAction = await middleware.process(state: state, with: action) {
                         await self.send(nextAction)
                     }
                 }
